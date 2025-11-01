@@ -1,4 +1,8 @@
-// Serverless function for hit counter
+// Serverless function for hit counter (in-memory)
+// Note: Counters reset on server restart in serverless environments
+
+let counters = new Map();
+
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,23 +16,26 @@ export default async function handler(req, res) {
   const { id = 'default' } = req.query;
 
   try {
-    const { kv } = await import('@vercel/kv');
-
     if (req.method === 'GET') {
-      const count = await kv.get(`counter:${id}`) || 0;
+      const count = counters.get(id) || 0;
       return res.status(200).json({
         id,
         count: parseInt(count),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        note: 'In-memory counter (resets on server restart)'
       });
     }
 
     if (req.method === 'POST') {
-      const newCount = await kv.incr(`counter:${id}`);
+      const currentCount = counters.get(id) || 0;
+      const newCount = currentCount + 1;
+      counters.set(id, newCount);
+      
       return res.status(200).json({
         id,
         count: newCount,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        note: 'In-memory counter (resets on server restart)'
       });
     }
 
