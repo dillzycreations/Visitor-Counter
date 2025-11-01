@@ -1,0 +1,10 @@
+name = "visitor-counter"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Your KV Namespace
+[[kv_namespaces]]
+binding = "COUNTER_STORE"
+id = "b87e2f013a654917ae3ba68f9e1bf2c5"
+
+main = "src/index.js"
