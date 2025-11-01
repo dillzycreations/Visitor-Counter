@@ -1,7 +1,6 @@
 {
   "name": "hit-counter-api",
   "version": "1.0.0",
-  "description": "A simple serverless hit counter API using Vercel KV",
   "main": "api/counter.js",
   "type": "module",
   "dependencies": {
