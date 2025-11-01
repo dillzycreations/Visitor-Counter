@@ -1,13 +1,13 @@
 {
-  "name": "hit-counter-api",
+  "name": "visitor-counter",
   "version": "1.0.0",
-  "description": "Simple hit counter API using Vercel (In-Memory)",
-  "main": "api/counter.js",
+  "description": "Visitor counter with Cloudflare Workers",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "vercel dev"
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
   },
-  "dependencies": {},
-  "engines": {
-    "node": ">=18.x"
+  "devDependencies": {
+    "wrangler": "^3.0.0"
   }
 }
