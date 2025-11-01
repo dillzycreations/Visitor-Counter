@@ -1,5 +1,23 @@
-// Serverless function for hit counter with image generation
+// Serverless function for hit counter with image generation and number formatting
 let counters = new Map();
+
+// Function to format numbers (1000 -> 1K, 100000 -> 1L, 10000000 -> 1Cr)
+function formatNumber(count) {
+  if (count >= 10000000) {
+    // Crore formatting (1,00,00,000 -> 1Cr)
+    const crore = count / 10000000;
+    return crore % 1 === 0 ? `${crore}Cr` : `${crore.toFixed(1)}Cr`;
+  } else if (count >= 100000) {
+    // Lakh formatting (1,00,000 -> 1L)
+    const lakh = count / 100000;
+    return lakh % 1 === 0 ? `${lakh}L` : `${lakh.toFixed(1)}L`;
+  } else if (count >= 1000) {
+    // Thousand formatting (1,000 -> 1K)
+    const thousand = count / 1000;
+    return thousand % 1 === 0 ? `${thousand}K` : `${thousand.toFixed(1)}K`;
+  }
+  return count.toString();
+}
 
 export default async function handler(req, res) {
   // Enable CORS
@@ -17,15 +35,20 @@ export default async function handler(req, res) {
     // Handle image request
     if (format === 'image' || req.headers.accept?.includes('image/')) {
       const count = counters.get(id) || 0;
+      const formattedCount = formatNumber(count);
+      
+      // Calculate text width based on formatted count length
+      const textWidth = formattedCount.length * 6 + 40;
+      const svgWidth = Math.max(120, textWidth);
       
       // Create SVG image
       const svg = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="20">
+        <svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="20">
           <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stop-color="#444"/>
             <stop offset="100%" stop-color="#222"/>
           </linearGradient>
-          <rect width="120" height="20" fill="url(#bg)" rx="3"/>
+          <rect width="${svgWidth}" height="20" fill="url(#bg)" rx="3"/>
           
           <linearGradient id="eye" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stop-color="#ff6b6b"/>
@@ -35,7 +58,7 @@ export default async function handler(req, res) {
           <circle cx="15" cy="10" r="2" fill="#000"/>
           
           <text x="30" y="14" font-family="Arial, sans-serif" font-size="11" fill="#fff">Views:</text>
-          <text x="70" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ffd700">${count}</text>
+          <text x="${svgWidth - 10}" y="14" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#ffd700" text-anchor="end">${formattedCount}</text>
         </svg>
       `;
 
@@ -47,9 +70,12 @@ export default async function handler(req, res) {
     // Handle JSON API requests
     if (req.method === 'GET') {
       const count = counters.get(id) || 0;
+      const formattedCount = formatNumber(count);
+      
       return res.status(200).json({
         id,
         count: parseInt(count),
+        formatted_count: formattedCount,
         timestamp: new Date().toISOString(),
         image_url: `${getBaseUrl(req)}/api/counter?id=${id}&format=image`,
         note: 'In-memory counter (resets on server restart)'
@@ -60,10 +86,12 @@ export default async function handler(req, res) {
       const currentCount = counters.get(id) || 0;
       const newCount = currentCount + 1;
       counters.set(id, newCount);
+      const formattedCount = formatNumber(newCount);
       
       return res.status(200).json({
         id,
         count: newCount,
+        formatted_count: formattedCount,
         timestamp: new Date().toISOString(),
         image_url: `${getBaseUrl(req)}/api/counter?id=${id}&format=image`,
         note: 'In-memory counter (resets on server restart)'
@@ -72,9 +100,12 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       counters.set(id, 0);
+      const formattedCount = formatNumber(0);
+      
       return res.status(200).json({
         id,
         count: 0,
+        formatted_count: formattedCount,
         timestamp: new Date().toISOString(),
         image_url: `${getBaseUrl(req)}/api/counter?id=${id}&format=image`,
         message: 'Counter reset to 0'
@@ -96,4 +127,4 @@ function getBaseUrl(req) {
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   return `${protocol}://${host}`;
-}
+                                          }
