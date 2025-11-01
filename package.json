@@ -1,0 +1,8 @@
+{
+  "name": "hit-counter-api",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "lowdb": "^7.0.1"
+  }
+}
