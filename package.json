@@ -1,8 +1,5 @@
 {
-  "name": "hit-counter-api",
+  "name": "visitor-counter",
   "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "lowdb": "^7.0.1"
-  }
+  "type": "module"
 }
