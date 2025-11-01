@@ -1,30 +1,19 @@
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
+// api/hit.js
+import fs from 'fs';
+import path from 'path';
 
-const db = new Low(new JSONFile("db.json"), { counters: {} });
-
-// Helper: update counter safely
-async function incrementCounter(id) {
-  await db.read();
-  db.data ||= { counters: {} };
-  db.data.counters[id] = (db.data.counters[id] || 0) + 1;
-  await db.write();
-  return db.data.counters[id];
-}
-
-// Main API handler
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const counterFile = path.join(process.cwd(), 'counter.json');
 
-  // if no ID, show all counters
-  if (!id) {
-    await db.read();
-    return res.status(200).json(db.data.counters);
+  let count = 0;
+  if (fs.existsSync(counterFile)) {
+    count = JSON.parse(fs.readFileSync(counterFile, 'utf8')).count;
   }
 
-  // Increment the counter
-  const hits = await incrementCounter(id);
+  count++;
 
-  // Return JSON
-  return res.status(200).json({ id, hits });
+  fs.writeFileSync(counterFile, JSON.stringify({ count }));
+
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json({ hits: count });
 }
