@@ -1,14 +1,12 @@
 {
   "name": "hit-counter-api",
   "version": "1.0.0",
-  "description": "Simple hit counter API using Vercel",
+  "description": "Simple hit counter API using Vercel (In-Memory)",
   "main": "api/counter.js",
   "scripts": {
     "dev": "vercel dev"
   },
-  "dependencies": {
-    "@vercel/kv": "^1.0.1"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=18.x"
   }
