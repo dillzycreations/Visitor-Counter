@@ -1,6 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/hit.js", "use": "@vercel/node" }
+  "functions": {
+    "api/counter.js": {
+      "runtime": "edge"
+    }
+  },
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" }
   ]
 }
